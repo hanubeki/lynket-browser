@@ -20,6 +20,9 @@
 
 package arun.com.chromer.browsing.customtabs
 
+import android.app.NotificationManager
+import android.content.Context
+import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -135,6 +138,14 @@ class BubbleCctShellActivity : BrowsingActivity() {
     super.onResume()
     if (isLoaded) {
       finish()
+    }
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    if (intent.hasExtra("hashCode")) {
+      val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+      notificationManager.cancel(intent.getIntExtra("hashCode", 0))
     }
   }
 

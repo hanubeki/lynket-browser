@@ -129,6 +129,7 @@ constructor(
       // A non-null action is required so the same Intent can back a sharing shortcut.
       action = Intent.ACTION_VIEW
       data = Uri.parse(website.url)
+      putExtra("hashCode", website.url.hashCode())
     }
 
     val bubbleIntent = PendingIntent.getActivity(
@@ -138,7 +139,7 @@ constructor(
       // FLAG_IMMUTABLE is mandatory once targeting Android 12 (targetSdk 31): without
       // it PendingIntent creation throws IllegalArgumentException and the bubble never
       // gets built. This is one half of why native bubbles were broken (issue #170).
-      PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+      PendingIntent.FLAG_IMMUTABLE
     )
 
     val bubbleIcon: Icon = bubbleData.icon
@@ -180,6 +181,7 @@ constructor(
             // shortcut person isOnlyBots(). setBot(true) here was exactly what made
             // Lynket's bubble judged "non-conversation" and dropped. Must be non-bot.
             .setBot(false)
+            .setKey(website.url)
             .setName(website.safeLabel())
             .setImportant(true)
             .build()
@@ -215,7 +217,7 @@ constructor(
     val bubbleNotification = notification(context, BUBBLE_NOTIFICATION_CHANNEL_ID) {
       setContentTitle(website.safeLabel())
       setContentText(website.preferredUrl())
-      setGroup(BUBBLE_NOTIFICATION_GROUP)
+      // setGroup(BUBBLE_NOTIFICATION_GROUP)
 
       setAllowSystemGeneratedContextualActions(true)
       bubbleData.color.takeIf { it != Constants.NO_COLOR }?.let(::setColor)
@@ -247,12 +249,13 @@ constructor(
         // MessagingStyle "self" person must not be a bot or isConversation() returns false.
         setBot(false)
         setIcon(bubbleIcon)
+        setKey(website.url)
         setName(website.safeLabel())
         setImportant(true)
       })
     }
 
-    updateGroupSummaryNotification(bubbleData.color)
+    // updateGroupSummaryNotification(bubbleData.color)
 
     notificationManager.notify(website.url.hashCode(), bubbleNotification)
     bubbleData
